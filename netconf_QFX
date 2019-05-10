@@ -1,0 +1,32 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import datetime
+import traceback
+from ncclient import manager
+
+def net_conf_qfx(DUT_ipaddress):
+ username = '***'
+ password = '***'
+ ipv4 = DUT_ipaddress
+ port = 22
+ 
+ now = datetime.datetime.now()
+ try:
+     connection = manager.connect(host = ipv4, port = port, username = username, password = password, timeout = 20, device_params={'name':'junos'}, hostkey_verify=False )
+     config=str(connection.command('show configuration',format="yaml"))
+     config2=str(connection.command('show configuration | display set',format="text"))
+     file="C:\\Users\\*****\\Desktop\\python\\netconf\\netconf_QFX\\config_log\\{0:%Y%m%d%H%M}_{1}.txt".format(now,ipv4)
+     with open(file,"a") as f:
+         f.write(config)
+         f.write(config2)
+ except:
+     file="C:\\Users\\*****\\Desktop\\python\\netconf\\netconf_QFX\\config_log\\{0:%Y%m%d%H%M}_{1}_SSHError.txt".format(now,ipv4)
+     with open(file, 'a') as f:
+        traceback.print_exc(file=f)
+
+file="C:\\Users\\*****\\Desktop\\python\\netconf\\netconf_QFX\\qfx_list.txt"
+with open(file,"r") as address_list:
+    address = address_list.readlines()
+for list in address:
+    net_conf_qfx(list.rstrip('\n'))
